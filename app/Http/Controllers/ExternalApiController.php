@@ -28,10 +28,17 @@ class ExternalApiController extends Controller
     public function store(Request $request){
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'nullable|email|max:255',
+            'content' => 'nullable|string|max:255',
         ]);
-        Http::post($this->url, $data);
-        return redirect()->route('external-users.index',)->with('success', 'Note created successfully!');
+        $response = Http::post($this->url, $data);
+        if ($response->successful()) {
+        return redirect()
+            ->route('external-users.index')
+            ->with('success', 'Note created successfully in the API!'); //
+    }
+        return back()
+        ->withInput() // Keeps the text in the fields so the user doesn't lose it
+        ->with('error', 'The external API could not process the request.');
     }
 
     public function edit($id){
@@ -43,14 +50,14 @@ class ExternalApiController extends Controller
     public function update(Request $request, $id){
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'nullable|email|max:255',
+            'content' => 'nullable|string|max:255',
         ]);
         Http::put("{$this->url}/{$id}", $data);
-        return redirect()->route('external-users.index')->with('success', 'User updated successfully!');
+        return redirect()->route('external-users.index')->with('success', 'Note updated successfully!');
     }
 
     public function destroy($id){
         Http::delete("{$this->url}/{$id}");
-        return redirect()->route('external-users.index')->with('success', 'User deleted successfully!');
+        return redirect()->route('external-users.index')->with('success', 'Note deleted successfully!');
     }
 }
